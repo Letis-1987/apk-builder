@@ -3,12 +3,14 @@ FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # 1. Установка базовых системных зависимостей, CMake, Ninja и JDK 17
+# Добавлен p7zip-full для стабильной распаковки Qt
 RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-utils \
     git \
     wget \
     unzip \
     curl \
+    p7zip-full \
     python3 \
     python3-pip \
     python3-setuptools \
@@ -26,13 +28,11 @@ ENV PATH=$JAVA_HOME/bin:$PATH
 # 2. Установка Android SDK & NDK
 ENV ANDROID_HOME=/opt/android-sdk
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
-# Версия Command-line tools (можно взять посвежее)
 ARG SDK_TOOLS_VERSION=11076708 
-# Версия NDK, официально рекомендованная для Qt 6.8+
 ARG NDK_VERSION=26.1.10909125 
 
 RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
-    wget -q https://dl.google.com/android/repository/commandlinetools-linux-${SDK_TOOLS_VERSION}_latest.zip  -O /tmp/cmdline-tools.zip && \
+    wget -q https://google.com{SDK_TOOLS_VERSION}_latest.zip  -O /tmp/cmdline-tools.zip && \
     unzip -q /tmp/cmdline-tools.zip -d ${ANDROID_HOME}/cmdline-tools && \
     mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest && \
     rm /tmp/cmdline-tools.zip
@@ -40,7 +40,6 @@ RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
 ENV PATH=${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:$PATH
 
 # Принятие лицензий и установка необходимых компонентов SDK/NDK
-# Для Xiaomi 15T Pro (Android 15+) ставим платформу android-35 (или выше)
 RUN yes | sdkmanager --licenses && \
     sdkmanager --update && \
     sdkmanager "platforms;android-35" \
@@ -54,8 +53,9 @@ ENV ANDROID_NDK_ROOT=${ANDROID_HOME}/ndk/${NDK_VERSION}
 ARG QT_VERSION=6.8.0
 ENV QT_PATH=/opt/qt
 
+# Исправлен синтаксис (добавлена архитектура) + ограничены воркеры для предотвращения OOM в CI
 RUN pip3 install --break-system-packages aqtinstall && \
-    aqt install-qt linux android ${QT_VERSION} --outputdir ${QT_PATH}
+    AQT_MAX_WORKERS=1 aqt install-qt linux android ${QT_VERSION} android_arm64_v8a --outputdir ${QT_PATH}
 
 # Прописываем пути к Qt внутри образа
 ENV QT_ANDROID_DIR=${QT_PATH}/${QT_VERSION}/android_arm64_v8a
