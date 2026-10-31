@@ -54,8 +54,9 @@ ARG QT_VERSION=6.8.0
 ENV QT_PATH=/opt/qt
 
 # Исправлен синтаксис (добавлена архитектура) + ограничены воркеры для предотвращения OOM в CI
+# Добавлен флаг --autodesktop
 RUN pip3 install --break-system-packages aqtinstall && \
-    AQT_MAX_WORKERS=1 aqt install-qt linux android ${QT_VERSION} android_arm64_v8a --outputdir ${QT_PATH}
+    AQT_MAX_WORKERS=1 aqt install-qt linux android ${QT_VERSION} android_arm64_v8a --outputdir ${QT_PATH} --autodesktop
 
 # Прописываем пути к Qt внутри образа
 ENV QT_ANDROID_DIR=${QT_PATH}/${QT_VERSION}/android_arm64_v8a
