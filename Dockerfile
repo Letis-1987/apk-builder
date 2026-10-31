@@ -32,7 +32,7 @@ ARG SDK_TOOLS_VERSION=11076708
 ARG NDK_VERSION=26.1.10909125 
 
 RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
-    wget -q https://google.com{SDK_TOOLS_VERSION}_latest.zip  -O /tmp/cmdline-tools.zip && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-${SDK_TOOLS_VERSION}_latest.zip -O /tmp/cmdline-tools.zip && \
     unzip -q /tmp/cmdline-tools.zip -d ${ANDROID_HOME}/cmdline-tools && \
     mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest && \
     rm /tmp/cmdline-tools.zip
