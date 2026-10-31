@@ -2,8 +2,7 @@ FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 1. Установка базовых системных зависимостей, CMake, Ninja и JDK 17
-# Добавлен p7zip-full для стабильной распаковки Qt
+# 1. Установка базовых системных зависимостей, CMake, Ninja, JDK 17 и libxkbcommon0 (критично для инструментов Qt 6)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-utils \
     git \
@@ -19,6 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ninja-build \
     openjdk-17-jdk \
     libgl1-mesa-dev \
+    libxkbcommon0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Настройка Java окружения
@@ -49,13 +49,13 @@ RUN yes | sdkmanager --licenses && \
 
 ENV ANDROID_NDK_ROOT=${ANDROID_HOME}/ndk/${NDK_VERSION}
 
-# 3. Установка Qt 6 для Android и Host инструментов через aqtinstall
+# 3. Установка Qt 6 для Android и хостовых инструментов через aqtinstall
 ARG QT_VERSION=6.8.0
 ENV QT_PATH=/opt/qt
 
-# Явно ставим сначала десктопную версию для утилит (moc, rcc), затем андроидную
+# Флаг --no-modules для desktop обязателен: он скачает только утилиты (moc, rcc), сэкономив гигабайты и память в CI
 RUN pip3 install --break-system-packages aqtinstall && \
-    AQT_MAX_WORKERS=1 aqt install-qt linux desktop ${QT_VERSION} gcc_64 --outputdir ${QT_PATH} && \
+    AQT_MAX_WORKERS=1 aqt install-qt linux desktop ${QT_VERSION} gcc_64 --no-modules --outputdir ${QT_PATH} && \
     AQT_MAX_WORKERS=1 aqt install-qt linux android ${QT_VERSION} android_arm64_v8a --outputdir ${QT_PATH}
 
 # Прописываем пути к Qt внутри образа
