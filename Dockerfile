@@ -55,7 +55,7 @@ ENV QT_PATH=/opt/qt
 
 # Флаг --no-modules для desktop обязателен: он скачает только утилиты (moc, rcc), сэкономив гигабайты и память в CI
 RUN pip3 install --break-system-packages aqtinstall && \
-    AQT_MAX_WORKERS=1 aqt install-qt linux desktop ${QT_VERSION} gcc_64 --archives qtbase --outputdir ${QT_PATH} && \
+    AQT_MAX_WORKERS=1 aqt install-qt linux desktop ${QT_VERSION} gcc_64 --outputdir ${QT_PATH} && \
     AQT_MAX_WORKERS=1 aqt install-qt linux android ${QT_VERSION} android_arm64_v8a --outputdir ${QT_PATH}
 
 # Прописываем пути к Qt внутри образа
