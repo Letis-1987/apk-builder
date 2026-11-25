@@ -2,7 +2,7 @@ FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 1. Установка базовых системных зависимостей, CMake, Ninja, JDK 17 и libxkbcommon0 (критично для инструментов Qt 6)
+# Установка базовых системных зависимостей, CMake, Ninja, JDK 17 и libxkbcommon0 (критично для инструментов Qt 6)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-utils \
     git \
@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV PATH=$JAVA_HOME/bin:$PATH
 
-# 2. Установка Android SDK & NDK
+# Подготовка к установке Android SDK & NDK
 ENV ANDROID_HOME=/opt/android-sdk
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
 ARG SDK_TOOLS_VERSION=11076708 
@@ -49,12 +49,10 @@ RUN yes | sdkmanager --licenses && \
 
 ENV ANDROID_NDK_ROOT=${ANDROID_HOME}/ndk/${NDK_VERSION}
 
-# 3. Установка Qt 6 для Android и хостовых инструментов через aqtinstall
-ARG QT_VERSION=6.8.0
-ENV QT_VERSION=${QT_VERSION}
+# Установка Qt 6 для Android и хостовых инструментов через aqtinstall
+ENV QT_VERSION=6.8.0
 ENV QT_PATH=/opt/qt
 
-# Флаг --no-modules для desktop обязателен: он скачает только утилиты (moc, rcc), сэкономив гигабайты и память в CI
 RUN pip3 install --break-system-packages aqtinstall && \
     aqt install-qt linux desktop ${QT_VERSION} linux_gcc_64 --outputdir ${QT_PATH} && \
     aqt install-qt linux android ${QT_VERSION} android_arm64_v8a --outputdir ${QT_PATH}
